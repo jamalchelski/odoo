@@ -1,0 +1,46 @@
+version: "3.2"
+services:
+  odoo-17:
+    image: odoo:17.0
+    depends_on:
+      - postgres-15
+    ports:
+      - "8116:8069"
+    volumes:
+      - odoo-data-volume:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    environment:
+      - PASSWORD_FILE=/run/secrets/postgresql_password
+    secrets:
+      - postgresql_password
+  postgres-15:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgresql_password
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - db-data-volume:/var/lib/postgresql/data/pgdata
+    secrets:
+      - postgresql_password
+  # ngrok:
+  #   image: ngrok/ngrok-v3-stable-alpine
+  #   restart: unless-stopped
+  #   ports:
+  #     - "4040:4040"
+  #   environment:
+  #     - NGROK_PORT=8116
+  #     - NGROK_PORT_AUTH=8116
+  #     - NGROK_AUTH=2gusoUhTih2bVhPWbjB3QKJ4gVb_3nwV5BeKYyHP7BN1c8H7S
+  #   volumes:
+  #     - ngrok-volume:/etc/ngrok.yml
+volumes:
+  odoo-data-volume:
+  db-data-volume:
+  # ngrok-volume:
+
+secrets:
+  postgresql_password:
+    file: ./config/odoo_pg_pass
